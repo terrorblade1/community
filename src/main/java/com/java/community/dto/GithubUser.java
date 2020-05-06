@@ -37,14 +37,12 @@ public class GithubUser {
         this.bio = bio;
     }
 
-    public String getLocation() {
-        return location;
+    @Override
+    public String toString() {
+        return "GithubUser{" +
+                "name='" + name + '\'' +
+                ", id=" + id +
+                ", bio='" + bio + '\'' +
+                '}';
     }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    private String location;
-
 }
