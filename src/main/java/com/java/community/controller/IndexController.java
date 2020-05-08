@@ -1,7 +1,10 @@
 package com.java.community.controller;
 
-import com.java.community.mapper.UserMapper;
+import com.java.community.dto.PaginationDTO;
+import com.java.community.dto.QuestionDTO;
 import com.java.community.model.User;
+import com.java.community.service.QuestionService;
+import com.java.community.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * Author: yk
@@ -19,21 +23,25 @@ import javax.servlet.http.HttpServletRequest;
 public class IndexController {
 
     @Autowired
-    private UserMapper userMapper;
+    private UserService userService;
 
+    @Autowired
+    private QuestionService questionService;
+
+    /**
+     * 显示首页
+     * @param request
+     * @param model
+     * @return
+     */
     @GetMapping("/")
-    public String index(HttpServletRequest request){
-        Cookie[] cookies = request.getCookies();
-        for (Cookie cookie:cookies){
-            if ("token".equals(cookie.getName())){
-                String token = cookie.getValue();
-                User user = userMapper.findByToken(token);
-                if (user != null){
-                    request.getSession().setAttribute("user",user);
-                }
-                break;
-            }
-        }
+    public String index(HttpServletRequest request,
+                        Model model,
+                        @RequestParam(name = "page", defaultValue = "1") Integer page,
+                        @RequestParam(name = "size", defaultValue = "5") Integer size){
+        User user = userService.findByToken(request);  //验证登录
+        PaginationDTO pagination = questionService.findAll(page,size);
+        model.addAttribute("pagination",pagination);
         return "index";
     }
 

@@ -5,6 +5,7 @@ import com.java.community.dto.GithubUser;
 import com.java.community.mapper.UserMapper;
 import com.java.community.model.User;
 import com.java.community.provider.GithubProvider;
+import com.java.community.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -35,8 +36,15 @@ public class AuthorizeController {
     private String redirectUri;
 
     @Autowired
-    private UserMapper userMapper;
+    private UserService userService;
 
+    /**
+     * github授权登录
+     * @param code
+     * @param state
+     * @param response
+     * @return
+     */
     @GetMapping("/callback")
     public String callback(@RequestParam(name = "code") String code,
                            @RequestParam(name = "state") String state,
@@ -49,21 +57,11 @@ public class AuthorizeController {
         accessTokenDTO.setState(state);
         String accessToken = githubProvider.getAccessToken(accessTokenDTO);
         GithubUser githubUser = githubProvider.getUser(accessToken);
-        if (githubUser != null){
-            //登录成功, 将用户信息装入数据库
-            User user = new User();
-            String token = UUID.randomUUID().toString();
-            user.setToken(token);
-            user.setName(githubUser.getName());
-            user.setAccountId(String.valueOf(githubUser.getId()));
-            user.setGmtCreate(System.currentTimeMillis());
-            user.setGmtModified(user.getGmtCreate());
-            userMapper.insert(user);
-            //将生成的token装入cookie中
-            response.addCookie(new Cookie("token",token));
-            return "redirect:/";  //重定向到首页
+        if ("loginSuccess".equals(userService.save(githubUser,response))){
+            return "redirect:/";  //登录成功,重定向回首页
         } else {
             //登录失败,重新登录
+
             return "redirect:/";
         }
     }

@@ -1,13 +1,14 @@
-package com.java.community.model;
+package com.java.community.dto;
 
+import com.java.community.model.User;
 import lombok.Data;
 
 /**
  * Author: yk
- * Date: 2020/5/6 20:48
+ * Date: 2020/5/7 14:55
  */
 @Data
-public class Question {
+public class QuestionDTO {
     private Integer id;
     private String title;
     private String description;
@@ -18,4 +19,5 @@ public class Question {
     private Integer commentCount;
     private Integer viewCount;
     private Integer likeCount;
+    private User user;
 }
