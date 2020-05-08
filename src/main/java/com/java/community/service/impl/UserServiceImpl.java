@@ -52,28 +52,5 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    /**
-     * 根据token判断用户是否登录
-     * @param request
-     */
-    @Override
-    public User findByToken(HttpServletRequest request) {
-        User user = null;
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null && cookies.length != 0){
-            for (Cookie cookie:cookies){
-                if ("token".equals(cookie.getName())){
-                    String token = cookie.getValue();
-                    //根据token取到登录用户信息
-                    user = userMapper.selectByToken(token);
-                    if (user != null){
-                        //用户信息不为空则存入session中
-                        request.getSession().setAttribute("user",user);
-                    }
-                    break;
-                }
-            }
-        }
-        return user;
-    }
+
 }

@@ -23,9 +23,6 @@ import java.util.List;
 public class IndexController {
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
     private QuestionService questionService;
 
     /**
@@ -39,7 +36,6 @@ public class IndexController {
                         Model model,
                         @RequestParam(name = "page", defaultValue = "1") Integer page,
                         @RequestParam(name = "size", defaultValue = "5") Integer size){
-        User user = userService.findByToken(request);  //验证登录
         PaginationDTO pagination = questionService.findAll(page,size);
         model.addAttribute("pagination",pagination);
         return "index";

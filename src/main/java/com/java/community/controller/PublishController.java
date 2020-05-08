@@ -2,7 +2,6 @@ package com.java.community.controller;
 
 import com.java.community.model.User;
 import com.java.community.service.QuestionService;
-import com.java.community.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,9 +20,6 @@ public class PublishController {
 
     @Autowired
     private QuestionService questionService;
-
-    @Autowired
-    private UserService userService;
 
     @GetMapping("/publish")
     public String publish(){
@@ -53,7 +49,9 @@ public class PublishController {
             model.addAttribute("error","标签不能为空");
             return "publish";
         }
-        User user = userService.findByToken(request);
+
+        User user = (User) request.getSession().getAttribute("user");
+
         if (user == null){
             model.addAttribute("error","用户未登录");
             return "publish";

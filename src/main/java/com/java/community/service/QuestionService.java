@@ -11,4 +11,6 @@ public interface QuestionService {
     void save(String title, String description, String tag, Integer creator);
 
     PaginationDTO findAll(Integer page, Integer size);
+
+    PaginationDTO findById(Integer id, Integer page, Integer size);
 }

@@ -14,5 +14,4 @@ public interface UserService {
 
     String save(GithubUser githubUser, HttpServletResponse response);
 
-    User findByToken(HttpServletRequest request);
 }
