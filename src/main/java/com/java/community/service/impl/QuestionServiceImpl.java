@@ -30,24 +30,6 @@ public class QuestionServiceImpl implements QuestionService {
     private UserMapper userMapper;
 
     /**
-     * 保存问题
-     * @param title
-     * @param description
-     * @param tag
-     */
-    @Override
-    public void save(String title, String description, String tag, Integer creator) {
-        Question question = new Question();
-        question.setTitle(title);
-        question.setDescription(description);
-        question.setTag(tag);
-        question.setCreator(creator);
-        question.setGmtCreate(System.currentTimeMillis());
-        question.setGmtModified(question.getGmtCreate());
-        questionMapper.insert(question);
-    }
-
-    /**
      * 分页查询全部问题
      * @return
      * @param page
@@ -78,7 +60,7 @@ public class QuestionServiceImpl implements QuestionService {
         List<Question> questions = questionMapper.selectAll(offset,size);
         List<QuestionDTO> questionDTOList = new ArrayList<>();
         for (Question question:questions){
-            User user = userMapper.findById(question.getCreator());
+            User user = userMapper.selectById(question.getCreator());
             QuestionDTO questionDTO = new QuestionDTO();
             //这是Spring框架内置的一个工具类
             //此方法作用为: 把 question 中的属性赋值给 questionDTO
@@ -98,7 +80,7 @@ public class QuestionServiceImpl implements QuestionService {
      * @return
      */
     @Override
-    public PaginationDTO findById(Integer id, Integer page, Integer size) {
+    public PaginationDTO findByUserId(Integer id, Integer page, Integer size) {
         PaginationDTO paginationDTO = new PaginationDTO();
         Integer totalCount = questionMapper.selectCountById(id);  //总条数
         Integer totalPage;  //总页数
@@ -119,10 +101,10 @@ public class QuestionServiceImpl implements QuestionService {
         //size * (page - 1)
         Integer offset = size * (page - 1);
         //select * from question limit #{offset},#{size}
-        List<Question> questions = questionMapper.selectById(id,offset,size);
+        List<Question> questions = questionMapper.selectByUserId(id,offset,size);
         List<QuestionDTO> questionDTOList = new ArrayList<>();
         for (Question question:questions){
-            User user = userMapper.findById(question.getCreator());
+            User user = userMapper.selectById(question.getCreator());
             QuestionDTO questionDTO = new QuestionDTO();
             //这是Spring框架内置的一个工具类
             //此方法作用为: 把 question 中的属性赋值给 questionDTO
@@ -132,5 +114,32 @@ public class QuestionServiceImpl implements QuestionService {
         }
         paginationDTO.setQuestions(questionDTOList);
         return paginationDTO;
+    }
+
+    /**
+     * 根据id查找问题
+     * @param id
+     * @return
+     */
+    @Override
+    public QuestionDTO findById(Integer id) {
+        Question question = questionMapper.selectById(id);
+        QuestionDTO questionDTO = new QuestionDTO();
+        BeanUtils.copyProperties(question,questionDTO);
+        User user = userMapper.selectById(question.getCreator());
+        questionDTO.setUser(user);
+        return questionDTO;
+    }
+
+    @Override
+    public void saveOrModify(Question question) {
+        if (question.getId() == null){  //添加
+            question.setGmtCreate(System.currentTimeMillis());
+            question.setGmtModified(question.getGmtCreate());
+            questionMapper.insert(question);
+        } else {  //更新
+            question.setGmtModified(System.currentTimeMillis());
+            questionMapper.update(question);
+        }
     }
 }

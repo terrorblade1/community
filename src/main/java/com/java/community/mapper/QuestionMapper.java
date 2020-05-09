@@ -1,10 +1,7 @@
 package com.java.community.mapper;
 
 import com.java.community.model.Question;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -22,11 +19,17 @@ public interface QuestionMapper {
     List<Question> selectAll(@Param(value = "offset") Integer offset,@Param(value = "size") Integer size);
 
     @Select("select * from question where creator=#{id} limit #{offset},#{size}")
-    List<Question> selectById(@Param(value = "id") Integer id,@Param(value = "offset") Integer offset,@Param(value = "size") Integer size);
+    List<Question> selectByUserId(@Param(value = "id") Integer id,@Param(value = "offset") Integer offset,@Param(value = "size") Integer size);
 
     @Select("select count(1) from question")
     Integer selectCount();
 
-    @Select("select count(1) from question where creator=${id}")
+    @Select("select count(1) from question where creator=#{id}")
     Integer selectCountById(@Param(value = "id") Integer id);
+
+    @Select("select * from question where id=#{id}")
+    Question selectById(@Param(value = "id") Integer id);
+
+    @Update("update question set title=#{title},description=#{description},gmt_modified=#{gmtModified},tag=#{tag} where id=#{id}")
+    void update(Question question);
 }

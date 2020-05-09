@@ -25,32 +25,26 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
 
     /**
-     *
-     * @param githubUser
-     * @param response
+     * 添加或更新用户数据
+     * @param user
      * @return
      */
     @Override
-    public String save(GithubUser githubUser, HttpServletResponse response) {
-        if (githubUser != null && githubUser.getId() != null){
-            //登录成功, 将用户信息装入数据库
-            User user = new User();
-            String token = UUID.randomUUID().toString();
-            user.setToken(token);
-            user.setName(githubUser.getName());
-            user.setAccountId(String.valueOf(githubUser.getId()));
+    public void saveOrModify(User user) {
+        User dbUser = userMapper.selectByAccountId(user.getAccountId());
+        if (dbUser == null){  //数据库中没有用户数据
+            //插入用户数据
             user.setGmtCreate(System.currentTimeMillis());
             user.setGmtModified(user.getGmtCreate());
-            user.setAvatarUrl(githubUser.getAvatarUrl());
             userMapper.insert(user);
-            //将生成的token装入cookie中
-            response.addCookie(new Cookie("token",token));
-            return "loginSuccess";
-        } else {
-            //登录失败,重新登录
-            return "loginFail";
+        } else {  //数据库中存在用户数据
+            //更新用户数据
+            dbUser.setGmtModified(System.currentTimeMillis());
+            dbUser.setAvatarUrl(user.getAvatarUrl());
+            dbUser.setName(user.getName());
+            dbUser.setToken(user.getToken());
+            userMapper.update(dbUser);
         }
     }
-
 
 }

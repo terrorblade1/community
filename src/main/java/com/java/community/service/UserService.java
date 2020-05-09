@@ -1,10 +1,6 @@
 package com.java.community.service;
 
-import com.java.community.dto.GithubUser;
 import com.java.community.model.User;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Author: yk
@@ -12,6 +8,5 @@ import javax.servlet.http.HttpServletResponse;
  */
 public interface UserService {
 
-    String save(GithubUser githubUser, HttpServletResponse response);
-
+    void saveOrModify(User user);
 }
