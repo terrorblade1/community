@@ -11,7 +11,7 @@ import java.util.List;
  */
 @Data
 public class PaginationDTO {
-    private List<QuestionDTO> questions;//页面要显示的数据
+    private List<QuestionDTO> questions;//页面要显示的话题数据
     private boolean showPrevious;//向前按钮 <
     private boolean showFirstPage;//第一页按钮 <<
     private boolean showNext;//向后按钮 >
