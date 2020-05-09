@@ -4,6 +4,7 @@ import com.java.community.dto.PaginationDTO;
 import com.java.community.dto.QuestionDTO;
 import com.java.community.exception.CustomizeErrorCode;
 import com.java.community.exception.CustomizeException;
+import com.java.community.mapper.QuestionExtMapper;
 import com.java.community.mapper.QuestionMapper;
 import com.java.community.mapper.UserMapper;
 import com.java.community.model.Question;
@@ -28,10 +29,13 @@ import java.util.List;
 public class QuestionServiceImpl implements QuestionService {
 
     @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
     private QuestionMapper questionMapper;
 
     @Autowired
-    private UserMapper userMapper;
+    private QuestionExtMapper questionExtMapper;
 
     /**
      * 分页查询全部问题
@@ -166,13 +170,9 @@ public class QuestionServiceImpl implements QuestionService {
      */
     @Override
     public void incView(Integer id) {
-        Question question = questionMapper.selectByPrimaryKey(id);
-        Question updateQuestion = new Question();
-        updateQuestion.setViewCount(question.getViewCount() + 1);
-        QuestionExample example = new QuestionExample();
-        example.createCriteria()
-                .andIdEqualTo(id);
-        questionMapper.updateByExampleSelective(updateQuestion, example);
-        //questionMapper.updateByPrimaryKeySelective(updateQuestion);
+        Question question = new Question();
+        question.setId(id);
+        question.setViewCount(1);
+        questionExtMapper.incView(question);
     }
 }
