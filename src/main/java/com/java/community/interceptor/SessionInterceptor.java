@@ -2,6 +2,7 @@ package com.java.community.interceptor;
 
 import com.java.community.mapper.UserMapper;
 import com.java.community.model.User;
+import com.java.community.model.UserExample;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -11,6 +12,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * Author: yk
@@ -30,10 +32,13 @@ public class SessionInterceptor implements HandlerInterceptor {
                 if ("token".equals(cookie.getName())){
                     String token = cookie.getValue();
                     //根据token取到登录用户信息
-                    User user = userMapper.selectByToken(token);
-                    if (user != null){
+                    UserExample userExample = new UserExample();
+                    userExample.createCriteria()
+                            .andTokenEqualTo(token);
+                    List<User> users = userMapper.selectByExample(userExample);
+                    if (users.size() != 0){
                         //用户信息不为空则存入session中
-                        request.getSession().setAttribute("user",user);
+                        request.getSession().setAttribute("user",users.get(0));
                     }
                     break;
                 }

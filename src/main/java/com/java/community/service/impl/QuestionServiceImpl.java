@@ -2,11 +2,15 @@ package com.java.community.service.impl;
 
 import com.java.community.dto.PaginationDTO;
 import com.java.community.dto.QuestionDTO;
+import com.java.community.exception.CustomizeErrorCode;
+import com.java.community.exception.CustomizeException;
 import com.java.community.mapper.QuestionMapper;
 import com.java.community.mapper.UserMapper;
 import com.java.community.model.Question;
+import com.java.community.model.QuestionExample;
 import com.java.community.model.User;
 import com.java.community.service.QuestionService;
+import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,7 +42,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public PaginationDTO findAll(Integer page, Integer size) {
         PaginationDTO paginationDTO = new PaginationDTO();
-        Integer totalCount = questionMapper.selectCount();  //总条数
+        Integer totalCount = (int) questionMapper.countByExample(new QuestionExample());  //总条数
         Integer totalPage;  //总页数
         if (totalCount % size == 0){
             //总页数 = 总条数 / 每页条数
@@ -57,10 +61,11 @@ public class QuestionServiceImpl implements QuestionService {
         //size * (page - 1)
         Integer offset = size * (page - 1);
         //select * from question limit #{offset},#{size}
-        List<Question> questions = questionMapper.selectAll(offset,size);
+        //分页查询
+        List<Question> questions = questionMapper.selectByExampleWithRowbounds(new QuestionExample(), new RowBounds(offset, size));
         List<QuestionDTO> questionDTOList = new ArrayList<>();
         for (Question question:questions){
-            User user = userMapper.selectById(question.getCreator());
+            User user = userMapper.selectByPrimaryKey(question.getCreator());
             QuestionDTO questionDTO = new QuestionDTO();
             //这是Spring框架内置的一个工具类
             //此方法作用为: 把 question 中的属性赋值给 questionDTO
@@ -82,8 +87,11 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public PaginationDTO findByUserId(Integer id, Integer page, Integer size) {
         PaginationDTO paginationDTO = new PaginationDTO();
-        Integer totalCount = questionMapper.selectCountById(id);  //总条数
         Integer totalPage;  //总页数
+        QuestionExample example = new QuestionExample();
+        example.createCriteria()
+                .andCreatorEqualTo(id);
+        Integer totalCount = (int) questionMapper.countByExample(example);  //总条数
         if (totalCount % size == 0){
             //总页数 = 总条数 / 每页条数
             totalPage = totalCount / size;
@@ -101,10 +109,13 @@ public class QuestionServiceImpl implements QuestionService {
         //size * (page - 1)
         Integer offset = size * (page - 1);
         //select * from question limit #{offset},#{size}
-        List<Question> questions = questionMapper.selectByUserId(id,offset,size);
+        QuestionExample questionExample = new QuestionExample();
+        questionExample.createCriteria()
+                .andCreatorEqualTo(id);
+        List<Question> questions = questionMapper.selectByExampleWithRowbounds(questionExample, new RowBounds(offset, size));
         List<QuestionDTO> questionDTOList = new ArrayList<>();
         for (Question question:questions){
-            User user = userMapper.selectById(question.getCreator());
+            User user = userMapper.selectByPrimaryKey(question.getCreator());
             QuestionDTO questionDTO = new QuestionDTO();
             //这是Spring框架内置的一个工具类
             //此方法作用为: 把 question 中的属性赋值给 questionDTO
@@ -123,10 +134,13 @@ public class QuestionServiceImpl implements QuestionService {
      */
     @Override
     public QuestionDTO findById(Integer id) {
-        Question question = questionMapper.selectById(id);
+        Question question = questionMapper.selectByPrimaryKey(id);
+        if (question == null){
+            throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUNT);
+        }
         QuestionDTO questionDTO = new QuestionDTO();
         BeanUtils.copyProperties(question,questionDTO);
-        User user = userMapper.selectById(question.getCreator());
+        User user = userMapper.selectByPrimaryKey(question.getCreator());
         questionDTO.setUser(user);
         return questionDTO;
     }
@@ -136,10 +150,29 @@ public class QuestionServiceImpl implements QuestionService {
         if (question.getId() == null){  //添加
             question.setGmtCreate(System.currentTimeMillis());
             question.setGmtModified(question.getGmtCreate());
-            questionMapper.insert(question);
+            questionMapper.insertSelective(question);
         } else {  //更新
             question.setGmtModified(System.currentTimeMillis());
-            questionMapper.update(question);
+            int upd = questionMapper.updateByPrimaryKeySelective(question);
+            if (upd != 1){
+                throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUNT);
+            }
         }
+    }
+
+    /**
+     * 累加阅读数
+     * @param id
+     */
+    @Override
+    public void incView(Integer id) {
+        Question question = questionMapper.selectByPrimaryKey(id);
+        Question updateQuestion = new Question();
+        updateQuestion.setViewCount(question.getViewCount() + 1);
+        QuestionExample example = new QuestionExample();
+        example.createCriteria()
+                .andIdEqualTo(id);
+        questionMapper.updateByExampleSelective(updateQuestion, example);
+        //questionMapper.updateByPrimaryKeySelective(updateQuestion);
     }
 }
