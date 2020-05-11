@@ -89,7 +89,7 @@ public class QuestionServiceImpl implements QuestionService {
      * @return
      */
     @Override
-    public PaginationDTO findByUserId(Integer id, Integer page, Integer size) {
+    public PaginationDTO findByUserId(Long id, Integer page, Integer size) {
         PaginationDTO paginationDTO = new PaginationDTO();
         Integer totalPage;  //总页数
         QuestionExample example = new QuestionExample();
@@ -137,10 +137,10 @@ public class QuestionServiceImpl implements QuestionService {
      * @return
      */
     @Override
-    public QuestionDTO findById(Integer id) {
+    public QuestionDTO findById(Long id) {
         Question question = questionMapper.selectByPrimaryKey(id);
         if (question == null){
-            throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUNT);
+            throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
         }
         QuestionDTO questionDTO = new QuestionDTO();
         BeanUtils.copyProperties(question,questionDTO);
@@ -154,12 +154,15 @@ public class QuestionServiceImpl implements QuestionService {
         if (question.getId() == null){  //添加
             question.setGmtCreate(System.currentTimeMillis());
             question.setGmtModified(question.getGmtCreate());
+            question.setViewCount(0);
+            question.setCommentCount(0);
+            question.setLikeCount(0);
             questionMapper.insertSelective(question);
         } else {  //更新
             question.setGmtModified(System.currentTimeMillis());
             int upd = questionMapper.updateByPrimaryKeySelective(question);
             if (upd != 1){
-                throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUNT);
+                throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
             }
         }
     }
@@ -169,7 +172,7 @@ public class QuestionServiceImpl implements QuestionService {
      * @param id
      */
     @Override
-    public void incView(Integer id) {
+    public void incView(Long id) {
         Question question = new Question();
         question.setId(id);
         question.setViewCount(1);

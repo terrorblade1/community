@@ -12,11 +12,11 @@ public interface QuestionService {
 
     PaginationDTO findAll(Integer page, Integer size);
 
-    PaginationDTO findByUserId(Integer id, Integer page, Integer size);
+    PaginationDTO findByUserId(Long id, Integer page, Integer size);
 
-    QuestionDTO findById(Integer id);
+    QuestionDTO findById(Long id);
 
     void saveOrModify(Question question);
 
-    void incView(Integer id);
+    void incView(Long id);
 }

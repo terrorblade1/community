@@ -5,6 +5,6 @@ package com.java.community.exception;
  * Date: 2020/5/9 16:17
  */
 public interface ICustomizeErrorCode {
-
     String getMessage();
+    Integer getCode();
 }
