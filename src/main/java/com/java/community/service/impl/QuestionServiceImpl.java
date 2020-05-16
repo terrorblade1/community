@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -66,7 +67,9 @@ public class QuestionServiceImpl implements QuestionService {
         Integer offset = size * (page - 1);
         //select * from question limit #{offset},#{size}
         //分页查询
-        List<Question> questions = questionMapper.selectByExampleWithRowbounds(new QuestionExample(), new RowBounds(offset, size));
+        QuestionExample questionExample = new QuestionExample();
+        questionExample.setOrderByClause("gmt_create desc");
+        List<Question> questions = questionMapper.selectByExampleWithRowbounds(questionExample, new RowBounds(offset, size));
         List<QuestionDTO> questionDTOList = new ArrayList<>();
         for (Question question:questions){
             User user = userMapper.selectByPrimaryKey(question.getCreator());
@@ -121,8 +124,6 @@ public class QuestionServiceImpl implements QuestionService {
         for (Question question:questions){
             User user = userMapper.selectByPrimaryKey(question.getCreator());
             QuestionDTO questionDTO = new QuestionDTO();
-            //这是Spring框架内置的一个工具类
-            //此方法作用为: 把 question 中的属性赋值给 questionDTO
             BeanUtils.copyProperties(question, questionDTO);
             questionDTO.setUser(user);
             questionDTOList.add(questionDTO);

@@ -1,6 +1,7 @@
 package com.java.community.service;
 
 import com.java.community.dto.CommentDTO;
+import com.java.community.enums.CommentTypeEnum;
 import com.java.community.model.Comment;
 
 import java.util.List;
@@ -13,6 +14,6 @@ public interface CommentService {
 
     void save(Comment comment);
 
-    List<CommentDTO> listByQuestionId(Long id);
+    List<CommentDTO> listByTargetId(Long id, CommentTypeEnum type);
 
 }
