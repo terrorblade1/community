@@ -13,6 +13,7 @@
     <result column="tag" jdbcType="VARCHAR" property="tag" />
   </resultMap>
 
+  <!--添加浏览数-->
   <update id="incView" parameterType="com.java.community.model.Question">
     update question
     set
@@ -20,12 +21,18 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
 
+  <!--添加评论数-->
   <update id="incCommentCount" parameterType="com.java.community.model.Question">
     update question
     set
     comment_count = comment_count + #{commentCount,jdbcType=INTEGER}
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+  <!--根据tag查询-->
+  <select id="selectRelated" parameterType="com.java.community.model.Question" resultMap="BaseResultMap">
+    select * from question where tag REGEXP #{tag}
+  </select>
 
 
 </mapper>

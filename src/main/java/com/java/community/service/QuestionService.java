@@ -4,6 +4,8 @@ import com.java.community.dto.PaginationDTO;
 import com.java.community.dto.QuestionDTO;
 import com.java.community.model.Question;
 
+import java.util.List;
+
 /**
  * Author: yk
  * Date: 2020/5/7 9:16
@@ -19,4 +21,6 @@ public interface QuestionService {
     void saveOrModify(Question question);
 
     void incView(Long id);
+
+    List<QuestionDTO> findRelated(QuestionDTO questionDTO);
 }

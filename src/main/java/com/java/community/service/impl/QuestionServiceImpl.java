@@ -11,6 +11,7 @@ import com.java.community.model.Question;
 import com.java.community.model.QuestionExample;
 import com.java.community.model.User;
 import com.java.community.service.QuestionService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Author: yk
@@ -179,4 +181,29 @@ public class QuestionServiceImpl implements QuestionService {
         question.setViewCount(1);
         questionExtMapper.incView(question);
     }
+
+    /**
+     *
+     * @param questionDTO
+     * @return
+     */
+    @Override
+    public List<QuestionDTO> findRelated(QuestionDTO questionDTO) {
+        if (StringUtils.isBlank(questionDTO.getTag())){
+            return new ArrayList<>();
+        }
+        String regexpTag = questionDTO.getTag().replaceAll("，|,", "|");
+        Question question = new Question();
+        question.setId(questionDTO.getId());
+        question.setTag(regexpTag);
+        List<Question> questions = questionExtMapper.selectRelated(question);
+        List<QuestionDTO> questionDTOS = questions.stream().map(q -> {
+            QuestionDTO quesDTO = new QuestionDTO();
+            BeanUtils.copyProperties(q,quesDTO);
+            return quesDTO;
+        }).collect(Collectors.toList());
+        return questionDTOS;
+    }
+
+
 }
