@@ -121,6 +121,7 @@ public class QuestionServiceImpl implements QuestionService {
         QuestionExample questionExample = new QuestionExample();
         questionExample.createCriteria()
                 .andCreatorEqualTo(id);
+        questionExample.setOrderByClause("gmt_create desc");
         List<Question> questions = questionMapper.selectByExampleWithRowbounds(questionExample, new RowBounds(offset, size));
         List<QuestionDTO> questionDTOList = new ArrayList<>();
         for (Question question:questions){
@@ -183,7 +184,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     /**
-     *
+     * 利用正则表达式查询和当前话题tag相关的话题
      * @param questionDTO
      * @return
      */

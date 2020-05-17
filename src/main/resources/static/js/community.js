@@ -115,6 +115,22 @@ function collapseComments(e) {
             });
         }
     }
+}
 
+//点击tag
+function selectTag(e) {
+    var value = e.getAttribute("data-tag");
+    var previous = $("#tag").val();
+    //判断tag的输入框中的值是否包含该tag
+    if (previous.indexOf(value) == -1){  //不包含
+        if (previous) {  //输入框中有值,拼接逗号
+            $("#tag").val(previous + "," + value);
+        } else {  //输入框中无值,直接加
+            $("#tag").val(value);
+        }
+    }
+}
 
+function showSelectTag() {
+    $("#select-tag").show();
 }

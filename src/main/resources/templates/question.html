@@ -85,7 +85,6 @@
                 </div>
             </div>
 
-
             <!--回复输入框-->
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <h4>添加回复</h4>
@@ -93,8 +92,8 @@
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="comment_section">
                     <div class="media">
                         <div class="media-left">
-                            <a th:href="${session.user != null?session.user.avatarUrl:''}" target="_blank">
-                                <img class="media-object img-thumbnail" th:src="${session.user != null?session.user.avatarUrl:''}">
+                            <a th:href="${session.user != null?session.user.avatarUrl:'https://github.com/login/oauth/authorize?client_id=35e70ded9fbe17eed68f&redirect_uri=http://localhost:8888/callback&scope=user&state=1'}" target="_blank">
+                                <img class="media-object img-thumbnail" th:src="${session.user != null?session.user.avatarUrl:'/images/notLogin.jpg'}">
                             </a>
                         </div>
                         <div class="media-body">
