@@ -3,6 +3,7 @@ package com.java.community.service;
 import com.java.community.dto.CommentDTO;
 import com.java.community.enums.CommentTypeEnum;
 import com.java.community.model.Comment;
+import com.java.community.model.User;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
  */
 public interface CommentService {
 
-    void save(Comment comment);
+    void save(Comment comment, User user);
 
     List<CommentDTO> listByTargetId(Long id, CommentTypeEnum type);
 
