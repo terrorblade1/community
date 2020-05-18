@@ -6,10 +6,15 @@
     <link rel="stylesheet" href="/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="/css/bootstrap-theme.min.css"/>
     <link rel="stylesheet" href="/css/community.css"/>
+    <link rel="stylesheet" href="/css/editormd.preview.min.css"/>
+
     <script src="/js/jquery-3.4.1.min.js" type="text/javascript"></script>
     <script src="/js/bootstrap.min.js" type="application/javascript"></script>
     <script src="/js/moment.js" type="application/javascript"></script>
     <script src="/js/community.js" type="application/javascript"></script>
+    <script src="/js/editormd.min.js" type="application/javascript"></script>
+    <script src="/js/lib/marked.min.js"></script>
+    <script src="/js/lib/prettify.min.js"></script>
 </head>
 <body>
 <!--引入导航栏-->
@@ -31,8 +36,16 @@
             </span>
                 <hr>
                 <!--内容-->
-                <h4 class="col-lg-12 col-md-12 col-sm-12 col-xs-12" th:text="${question.description}"></h4>
-                <br><br><hr>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="question-view">
+                    <textarea style="display:none;" th:text="${question.description}"></textarea>
+                </div>
+                <script type="text/javascript">
+                    $(function () {
+                        editormd.markdownToHTML("question-view", {});
+                    });
+                </script>
+
+                <hr class="comment-sp">
                 <!--标签-->
                 标签：<span class="label label-info question-tag" th:each="tag : ${question.tag.split(',')}">
                           <span class="glyphicon glyphicon-tag"></span>
@@ -46,7 +59,7 @@
                 <hr class="comment-sp">
             </div>
 
-            <!--回复-->
+            <!--评论-->
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <h4><span th:text="${question.commentCount}"></span> 个回复</h4>
                 <hr class="comment-sp">
@@ -93,7 +106,7 @@
                     <div class="media">
                         <div class="media-left">
                             <a th:href="${session.user != null?session.user.avatarUrl:'https://github.com/login/oauth/authorize?client_id=35e70ded9fbe17eed68f&redirect_uri=http://localhost:8888/callback&scope=user&state=1'}" target="_blank">
-                                <img class="media-object img-thumbnail" th:src="${session.user != null?session.user.avatarUrl:'/images/notLogin.jpg'}">
+                                <img class="media-object img-thumbnail" th:src="${session.user != null?session.user.avatarUrl:'/images/default-avatar.png'}">
                             </a>
                         </div>
                         <div class="media-body">
@@ -103,7 +116,7 @@
                         </div>
                     </div>
                     <input type="hidden" id="question_id" th:value="${question.id}">
-                    <textarea class="form-control comment" rows="6" id="comment_content"></textarea>
+                    <textarea class="form-control comment" rows="3" id="comment_content"></textarea>
                     <button type="button" class="btn btn-success btn-comment" onclick="post()">回复</button>
                 </div>
             </div>

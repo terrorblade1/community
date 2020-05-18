@@ -160,3 +160,8 @@ body {
 .new-replies {
     margin-top: 20px;
 }
+
+.tag-div {
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}
