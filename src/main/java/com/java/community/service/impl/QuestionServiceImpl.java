@@ -206,5 +206,20 @@ public class QuestionServiceImpl implements QuestionService {
         return questionDTOS;
     }
 
+    /**
+     * 查询热门话题(浏览数前五)
+     * @return
+     */
+    @Override
+    public List<QuestionDTO> findHotQuestions(){
+        List<Question> questions = questionExtMapper.selectHotQuestions();
+        List<QuestionDTO> questionDTOS = new ArrayList<>();
+        for (Question question : questions) {
+            QuestionDTO questionDTO = new QuestionDTO();
+            BeanUtils.copyProperties(question,questionDTO);
+            questionDTOS.add(questionDTO);
+        }
+        return questionDTOS;
+    }
 
 }

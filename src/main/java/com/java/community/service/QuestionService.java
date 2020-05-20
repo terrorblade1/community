@@ -23,4 +23,6 @@ public interface QuestionService {
     void incView(Long id);
 
     List<QuestionDTO> findRelated(QuestionDTO questionDTO);
+
+    List<QuestionDTO> findHotQuestions();
 }

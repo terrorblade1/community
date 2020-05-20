@@ -34,5 +34,10 @@
     select * from question where id != #{id} AND tag REGEXP #{tag}
   </select>
 
+  <!--查找浏览数前五的话题-->
+  <select id="selectHotQuestions" parameterType="com.java.community.model.Question" resultMap="BaseResultMap">
+    SELECT * FROM question ORDER BY view_count DESC LIMIT 5
+  </select>
+
 
 </mapper>
