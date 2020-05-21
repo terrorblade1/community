@@ -16,6 +16,8 @@
 
 	<properties>
 		<java.version>1.8</java.version>
+		<!--自定义es版本依赖,保证与本地一致-->
+		<elasticsearch.version>7.7.0</elasticsearch.version>
 	</properties>
 
 	<dependencies>
@@ -93,6 +95,21 @@
 			<version>2.4.4</version>
 		</dependency>
 
+		<!--elasticsearch-->
+		<dependency>
+			<groupId>org.elasticsearch.client</groupId>
+			<artifactId>elasticsearch-rest-high-level-client</artifactId>
+			<version>7.7.0</version>
+		</dependency>
+
+		<!--junit-->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13</version>
+		</dependency>
+
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -107,6 +124,30 @@
 	</dependencies>
 
 	<build>
+		<resources>
+			<!--设置filter，font文件不需要filter-->
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<excludes>
+					<exclude>static/fonts/**</exclude>
+				</excludes>
+			</resource>
+			<!-- fonts file cannot use filter as the data structure of byte file will be changed via filter -->
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+				<includes>
+					<include>static/fonts/**</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/*.xml</include>
+				</includes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

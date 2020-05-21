@@ -3,11 +3,11 @@
 <head>
     <title>code community</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link rel="stylesheet" href="css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="css/bootstrap-theme.min.css"/>
-    <link rel="stylesheet" href="css/community.css"/>
-    <script src="js/jquery-3.4.1.min.js" type="text/javascript"></script>
-    <script src="js/bootstrap.min.js" type="application/javascript"></script>
+    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/bootstrap-theme.min.css"/>
+    <link rel="stylesheet" href="/css/community.css"/>
+    <script src="/js/jquery-3.4.1.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="application/javascript"></script>
 </head>
 <script type="application/javascript">
     window.onload = function () {  //打开页面时加载此变量,true则关闭页面并移除变量
@@ -36,7 +36,7 @@
                 </div>
                 <div class="media-body">
                     <a th:href="@{'/question/'+${question.id}}">
-                        <h4 class="media-heading ques-title" th:text="${question.title}"></h4>
+                        <h4 class="media-heading ques-title" th:utext="${question.title}"></h4>
                     </a>
                     <!--<span th:text="${question.description}"></span> <br>-->
                     <span class="text-desc">

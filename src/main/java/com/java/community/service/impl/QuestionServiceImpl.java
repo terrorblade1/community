@@ -1,5 +1,7 @@
 package com.java.community.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.java.community.dto.PaginationDTO;
 import com.java.community.dto.QuestionDTO;
 import com.java.community.exception.CustomizeErrorCode;
@@ -13,14 +15,42 @@ import com.java.community.model.User;
 import com.java.community.service.QuestionService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.RowBounds;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.client.indices.CreateIndexResponse;
+import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.common.text.Text;
+import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.MatchAllQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -39,6 +69,10 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Autowired
     private QuestionExtMapper questionExtMapper;
+
+    @Autowired
+    private RestHighLevelClient restHighLevelClient;
+
 
     /**
      * 分页查询全部问题
@@ -220,6 +254,142 @@ public class QuestionServiceImpl implements QuestionService {
             questionDTOS.add(questionDTO);
         }
         return questionDTOS;
+    }
+
+    /**
+     * 定时将话题数据存入elasticsearch中
+     */
+    @Override
+    @Scheduled(cron = "0/30 * * * * ? ")//每30s执行一次
+    public void saveDataToElasticSearch(){
+        //判断索引是否存在
+        GetIndexRequest request = new GetIndexRequest("community");
+        boolean exists = false;
+        try {
+            exists = restHighLevelClient.indices().exists(request, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (exists){
+            //删除索引再创建(清空之前的数据)
+            DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest("community");
+            AcknowledgedResponse delete = null;
+            try {
+                delete = restHighLevelClient.indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
+                CreateIndexRequest createIndexRequest = new CreateIndexRequest("community");
+                CreateIndexResponse createIndexResponse = restHighLevelClient.indices().create(createIndexRequest, RequestOptions.DEFAULT);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        //添加
+        List<Question> questions = questionMapper.selectByExample(new QuestionExample());
+        List<QuestionDTO> questionDTOList = new ArrayList<>();
+        for (Question question : questions) {
+            User user = userMapper.selectByPrimaryKey(question.getCreator());
+            QuestionDTO questionDTO = new QuestionDTO();
+            BeanUtils.copyProperties(question,questionDTO);
+            questionDTO.setUser(user);
+            questionDTOList.add(questionDTO);
+        }
+        BulkRequest bulkRequest = new BulkRequest();
+        bulkRequest.timeout("60s");
+        for (int i = 0; i < questionDTOList.size(); i++) {
+            bulkRequest.add(new IndexRequest("community")
+                    .source(JSON.toJSONString(questionDTOList.get(i)), XContentType.JSON));
+        }
+        BulkResponse bulkResponse = null;
+        try {
+            bulkResponse = restHighLevelClient.bulk(bulkRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * 通过elasticsearch查找
+     * @param keyword
+     * @param page
+     * @param size
+     * @return
+     */
+    @Override
+    public PaginationDTO findByElasticSearch(String keyword, Integer page, Integer size) throws IOException {
+        SearchRequest searchRequest = new SearchRequest("community");
+        //构建查询的条件
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        // 匹配所有 matchAllQueryBuilder / 精确匹配 termQueryBuilder
+        MatchQueryBuilder matchQueryBuilder = QueryBuilders.matchQuery("title", keyword);
+        sourceBuilder.query(matchQueryBuilder);
+        //sourceBuilder.timeout(new TimeValue(60, TimeUnit.SECONDS));
+        //高亮显示
+        HighlightBuilder highlightBuilder = new HighlightBuilder();
+        highlightBuilder.field("title");
+        highlightBuilder.preTags("<span style='color:red'>");//前缀
+        highlightBuilder.postTags("</span>");//后缀
+        sourceBuilder.highlighter(highlightBuilder);
+        //执行搜索
+        searchRequest.source(sourceBuilder);
+        SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+        //解析结果
+        List<QuestionDTO> questionDTOList = new ArrayList<>();
+        for (SearchHit hit : searchResponse.getHits().getHits()) {
+            Map<String, HighlightField> highlightFields = hit.getHighlightFields();//获取高亮字段
+            HighlightField title = highlightFields.get("title");
+            Map<String, Object> map = hit.getSourceAsMap();
+            if (title != null){//解析高亮字段 将原来的字段替换为高亮字段
+                Text[] fragments = title.fragments();//取出字段
+                String newTitle = "";
+                for (Text text : fragments) {
+                    newTitle += text;
+                }
+                map.put("title",newTitle);//替换
+            }
+            //封装
+            QuestionDTO questionDTO = new QuestionDTO();
+            questionDTO.setId(Long.parseLong(map.get("id").toString()));
+            questionDTO.setTitle((String) map.get("title"));
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String userStr = objectMapper.writeValueAsString(map.get("user"));
+            User user = objectMapper.readValue(userStr, User.class);
+            questionDTO.setUser(user);
+
+            questionDTO.setDescription((String) map.get("description"));
+            questionDTO.setTag((String) map.get("tag"));
+            questionDTO.setGmtCreate(Long.parseLong(map.get("gmtCreate").toString()));
+            questionDTO.setGmtModified(Long.parseLong(map.get("gmtModified").toString()));
+            questionDTO.setCreator(Long.parseLong(map.get("creator").toString()));
+            questionDTO.setCommentCount(Integer.parseInt(map.get("commentCount").toString()));
+            questionDTO.setViewCount(Integer.parseInt(map.get("viewCount").toString()));
+            questionDTO.setLikeCount(Integer.parseInt(map.get("likeCount").toString()));
+            questionDTOList.add(questionDTO);
+        }
+        System.out.println(questionDTOList);
+
+        PaginationDTO paginationDTO = new PaginationDTO();
+        Integer totalCount = questionDTOList.size();  //查询出的数据总条数
+        Integer totalPage;  //总页数
+        if (totalCount % size == 0){
+            //总页数 = 总条数 / 每页条数
+            totalPage = totalCount / size;
+        } else {
+            //总页数 = 总条数 / 每页条数 + 1
+            totalPage = totalCount / size +1;
+        }
+        if (page < 1){
+            page = 1;  //页码小于1则设置成1
+        }
+        if (page > totalPage){
+            page = totalPage;  //页码大总页码则设置成总页码
+        }
+        paginationDTO.setPagination(totalPage,page);  //设置传到页面的分页数据
+        //size * (page - 1)
+        Integer offset = size * (page - 1);
+        //select * from question limit #{offset},#{size}
+        paginationDTO.setData(questionDTOList);
+        return paginationDTO;
     }
 
 }

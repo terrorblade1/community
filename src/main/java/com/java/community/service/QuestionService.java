@@ -4,6 +4,7 @@ import com.java.community.dto.PaginationDTO;
 import com.java.community.dto.QuestionDTO;
 import com.java.community.model.Question;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -25,4 +26,8 @@ public interface QuestionService {
     List<QuestionDTO> findRelated(QuestionDTO questionDTO);
 
     List<QuestionDTO> findHotQuestions();
+
+    void saveDataToElasticSearch();
+
+    PaginationDTO findByElasticSearch(String keyword, Integer page, Integer size) throws IOException;
 }
