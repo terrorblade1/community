@@ -6,6 +6,7 @@ import com.java.community.mapper.UserMapper;
 import com.java.community.model.User;
 import com.java.community.provider.GithubProvider;
 import com.java.community.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -22,6 +23,7 @@ import java.util.UUID;
  * Date: 2020/5/6 8:40
  */
 @Controller
+@Slf4j
 public class AuthorizeController {
 
     @Autowired
@@ -68,6 +70,9 @@ public class AuthorizeController {
             userService.saveOrModify(user);
             //将生成的token装入cookie中
             response.addCookie(new Cookie("token",token));
+        } else {
+            //登录失败
+            log.error("callback get github error,{}",githubUser);
         }
         return "redirect:/";
     }
