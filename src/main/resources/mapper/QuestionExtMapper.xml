@@ -39,5 +39,9 @@
     SELECT * FROM question ORDER BY view_count DESC LIMIT 5
   </select>
 
+  <!--根据单个tag查找相关话题-->
+  <select id="selectByTag" parameterType="com.java.community.model.Question" resultMap="BaseResultMap">
+    SELECT * FROM question WHERE tag REGEXP #{tag}
+  </select>
 
 </mapper>

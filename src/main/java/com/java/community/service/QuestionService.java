@@ -27,6 +27,8 @@ public interface QuestionService {
 
     List<QuestionDTO> findHotQuestions();
 
+    PaginationDTO findByTag(String tag, Integer page, Integer size);
+
     void saveDataToElasticSearch();
 
     PaginationDTO findByElasticSearch(String keyword, Integer page, Integer size) throws IOException;

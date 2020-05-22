@@ -73,7 +73,6 @@ public class QuestionServiceImpl implements QuestionService {
     @Autowired
     private RestHighLevelClient restHighLevelClient;
 
-
     /**
      * 分页查询全部问题
      * @return
@@ -257,10 +256,49 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     /**
+     * 根据单个tag查找相关话题
+     * @param tag
+     * @return
+     */
+    @Override
+    public PaginationDTO findByTag(String tag, Integer page, Integer size){
+        PaginationDTO paginationDTO = new PaginationDTO();
+        List<Question> questions = questionExtMapper.selectByTag(tag);
+        List<QuestionDTO> questionDTOS = new ArrayList<>();
+        for (Question question : questions) {
+            User user = userMapper.selectByPrimaryKey(question.getCreator());
+            QuestionDTO questionDTO = new QuestionDTO();
+            BeanUtils.copyProperties(question,questionDTO);
+            questionDTO.setUser(user);
+            questionDTOS.add(questionDTO);
+        }
+        paginationDTO.setData(questionDTOS);
+
+        Integer totalPage;  //总页数
+        Integer totalCount = questionDTOS.size();  //总条数
+        if (totalCount % size == 0){
+            //总页数 = 总条数 / 每页条数
+            totalPage = totalCount / size;
+        } else {
+            //总页数 = 总条数 / 每页条数 + 1
+            totalPage = totalCount / size +1;
+        }
+        if (page < 1){
+            page = 1;  //页码小于1则设置成1
+        }
+        if (page > totalPage){
+            page = totalPage;  //页码大总页码则设置成总页码
+        }
+        paginationDTO.setPagination(totalPage,page);  //设置传到页面的分页数据
+        return paginationDTO;
+    }
+
+
+    /**
      * 定时将话题数据存入elasticsearch中
      */
     @Override
-    @Scheduled(cron = "0/30 * * * * ? ")//每30s执行一次
+    @Scheduled(cron = "0/60 * * * * ? ")//每60s执行一次
     public void saveDataToElasticSearch(){
         //判断索引是否存在
         GetIndexRequest request = new GetIndexRequest("community");
@@ -366,7 +404,6 @@ public class QuestionServiceImpl implements QuestionService {
             questionDTO.setLikeCount(Integer.parseInt(map.get("likeCount").toString()));
             questionDTOList.add(questionDTO);
         }
-        System.out.println(questionDTOList);
 
         PaginationDTO paginationDTO = new PaginationDTO();
         Integer totalCount = questionDTOList.size();  //查询出的数据总条数

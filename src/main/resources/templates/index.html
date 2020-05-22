@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/css/community.css"/>
     <script src="/js/jquery-3.4.1.min.js" type="text/javascript"></script>
     <script src="/js/bootstrap.min.js" type="application/javascript"></script>
+    <!--<script src="/js/weather.js" type="text/javascript"></script>-->
 </head>
 <script type="application/javascript">
     window.onload = function () {  //打开页面时加载此变量,true则关闭页面并移除变量
@@ -25,68 +26,191 @@
 
 <div class="container-fluid main">
     <div class="row">
-        <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12 left-div">
-            <h2><span class="glyphicon glyphicon-flag" aria-hidden="true"></span> 发现</h2>
-            <hr>
-            <div class="media" th:each="question : ${pagination.data}">
-                <div class="media-left">
-                    <a href="#">
-                        <img class="media-object img-thumbnail" th:src="${question.user.avatarUrl}">
-                    </a>
-                </div>
-                <div class="media-body">
-                    <a th:href="@{'/question/'+${question.id}}">
-                        <h4 class="media-heading ques-title" th:utext="${question.title}"></h4>
-                    </a>
-                    <!--<span th:text="${question.description}"></span> <br>-->
-                    <span class="text-desc">
-                        <span th:text="${question.commentCount}"></span> 个回复
-                        • <span th:text="${question.viewCount}"></span> 次浏览
-                        • <span th:text="${question.likeCount}"></span> 次点赞
-                        • <span th:text="${#dates.format(question.gmtCreate,'yyyy-MM-dd HH:mm')}"></span>
-                    </span>
-                    <hr>
-                </div>
-            </div>
-            <nav aria-label="Page navigation">
-                <ul class="pagination">
-                    <li th:if="${pagination.showFirstPage}">
-                        <a href="/?page=1" aria-label="Previous">
-                            <span aria-hidden="true">&lt;&lt;</span>
-                        </a>
-                    </li>
-                    <li th:if="${pagination.showPrevious}">
-                        <a th:href="@{/(page=${pagination.page-1})}" aria-label="Previous">
-                            <span aria-hidden="true">&lt;</span>
-                        </a>
-                    </li>
-                    <li th:each="page : ${pagination.pages}" th:class="${pagination.page == page}?'active':''">
-                        <a th:href="@{/(page=${page})}" th:text="${page}"></a>
-                    </li>
-                    <li th:if="${pagination.showNext}">
-                        <a th:href="@{/(page=${pagination.page+1})}" aria-label="Previous">
-                            <span aria-hidden="true">&gt;</span>
-                        </a>
-                    </li>
-                    <li th:if="${pagination.showEndPage}">
-                        <a th:href="@{/(page=${pagination.totalPage})}" aria-label="Previous">
-                            <span aria-hidden="true">&gt;&gt;</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-        <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
-            <h3 class="hot-h3">
-                <span class="glyphicon glyphicon-fire icon-fire"></span> 热门话题
+        <!--左边-->
+        <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+            <h3><!--<span class="glyphicon glyphicon-list" aria-hidden="true"></span>-->
+                <img src="/images/list.gif" width="30px" height="30px" > 发现
             </h3>
-            <hr>
-            <ol class="hot-question">
-                <li th:each="question : ${questions}">
-                    <a th:href="@{'/question/'+${question.id}}" th:text="${question.title}"></a>
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active">
+                    <a href="#home" aria-controls="home" role="tab" data-toggle="tab">最新</a>
                 </li>
-            </ol>
-            <hr>
+                <!--<li role="presentation">
+                    <a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Profile</a>
+                </li>
+                <li role="presentation">
+                    <a href="#messages" aria-controls="messages" role="tab" data-toggle="tab">Messages</a>
+                </li>-->
+                <li role="presentation">
+                    <a href="#settings" aria-controls="settings" role="tab" data-toggle="tab">消灭0回复</a>
+                </li>
+            </ul>
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="home">
+                    <!--最新-->
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="media" th:each="question : ${pagination.data}">
+                                <div class="media-left">
+                                    <a href="#">
+                                        <img class="media-object img-thumbnail" th:src="${question.user.avatarUrl}">
+                                    </a>
+                                </div>
+                                <div class="media-body">
+                                    <a th:href="@{'/question/'+${question.id}}">
+                                        <h4 class="media-heading ques-title" th:utext="${question.title}"></h4>
+                                    </a>
+                                    <!--<span th:text="${question.description}"></span> <br>-->
+                                    <span class="text-desc">
+                                        <span th:text="${question.commentCount}"></span> 个回复
+                                        • <span th:text="${question.viewCount}"></span> 次浏览
+                                        • <span th:text="${question.likeCount}"></span> 次点赞
+                                        • <span th:text="${#dates.format(question.gmtCreate,'yyyy-MM-dd HH:mm')}"></span>
+                                    </span>
+                                    <hr>
+                                </div>
+                            </div>
+                            <!--分页-->
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination">
+                                    <li th:if="${pagination.showFirstPage}">
+                                        <a href="/?page=1" aria-label="Previous">
+                                            <span aria-hidden="true">&lt;&lt;</span>
+                                        </a>
+                                    </li>
+                                    <li th:if="${pagination.showPrevious}">
+                                        <a th:href="@{/(page=${pagination.page-1})}" aria-label="Previous">
+                                            <span aria-hidden="true">&lt;</span>
+                                        </a>
+                                    </li>
+                                    <li th:each="page : ${pagination.pages}" th:class="${pagination.page == page}?'active':''">
+                                        <a th:if="${pagination.totalPage > 1}" th:href="@{/(page=${page})}" th:text="${page}"></a>
+                                    </li>
+                                    <li th:if="${pagination.showNext}">
+                                        <a th:href="@{/(page=${pagination.page+1})}" aria-label="Previous">
+                                            <span aria-hidden="true">&gt;</span>
+                                        </a>
+                                    </li>
+                                    <li th:if="${pagination.showEndPage}">
+                                        <a th:href="@{/(page=${pagination.totalPage})}" aria-label="Previous">
+                                            <span aria-hidden="true">&gt;&gt;</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                <!--<div role="tabpanel" class="tab-pane" id="profile">2</div>
+                <div role="tabpanel" class="tab-pane" id="messages">3</div>-->
+                <div role="tabpanel" class="tab-pane" id="settings">消灭0回复</div>
+            </div>
+        </div>
+
+        <!--右边-->
+        <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
+            <div class="panel panel-default">
+                <!--热门话题-->
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <span class="glyphicon glyphicon-fire icon-fire"></span> 热门话题
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    <ol class="hot-question">
+                        <li th:each="question : ${questions}">
+                            <a th:href="@{'/question/'+${question.id}}" th:text="${question.title}"></a>
+                        </li>
+                    </ol>
+                </div>
+                <!--常用标签-->
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <span class="glyphicon glyphicon-paperclip"></span> 常用标签
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    <ul class="search-tag">
+                        <li class="tags">
+                            <a href="/tag/Java">
+                                <span class="label label-info">
+                                    <span class="glyphicon glyphicon-tag"></span> Java
+                                </span>
+                            </a>
+                        </li>
+                        <li  class="tags">
+                            <a href="/tag/MySQL">
+                                <span class="label label-info">
+                                    <span class="glyphicon glyphicon-tag"></span> MySQL
+                                </span>
+                            </a>
+                        </li>
+                        <li  class="tags">
+                            <a href="/tag/Spring">
+                                <span class="label label-info">
+                                    <span class="glyphicon glyphicon-tag"></span> Spring
+                                </span>
+                            </a>
+                        </li>
+                        <li  class="tags">
+                            <a href="/tag/CSS">
+                                <span class="label label-info">
+                                    <span class="glyphicon glyphicon-tag"></span> CSS
+                                </span>
+                            </a>
+                        </li>
+                        <li  class="tags">
+                            <a href="/tag/JavaScript">
+                                <span class="label label-info">
+                                    <span class="glyphicon glyphicon-tag"></span> JavaScript
+                                </span>
+                            </a>
+                        </li>
+                        <li  class="tags">
+                            <a href="/tag/SpringMVC">
+                                <span class="label label-info">
+                                    <span class="glyphicon glyphicon-tag"></span> SpringMVC
+                                </span>
+                            </a>
+                        </li>
+                        <li  class="tags">
+                            <a href="/tag/MyBatis">
+                                <span class="label label-info">
+                                    <span class="glyphicon glyphicon-tag"></span> MyBatis
+                                </span>
+                            </a>
+                        </li>
+                        <li  class="tags">
+                            <a href="/tag/Tomcat">
+                                <span class="label label-info">
+                                    <span class="glyphicon glyphicon-tag"></span> Tomcat
+                                </span>
+                            </a>
+                        </li>
+                        <li  class="tags">
+                            <a href="/tag/HTML">
+                                <span class="label label-info">
+                                    <span class="glyphicon glyphicon-tag"></span> HTML
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <!--联系站长-->
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <span class="glyphicon glyphicon-link"></span> 联系站长
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    <!--<a href="https://space.bilibili.com/12024294">bilibili</a>-->
+                    <img class="qq-wechat" src="/images/qq&wechat.png" width="280px" height="160px">
+                </div>
+
+            </div>
+
         </div>
     </div>
 </div>

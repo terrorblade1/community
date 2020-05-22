@@ -23,17 +23,17 @@ public class TagCache {
         List<TagDTO> tagDTOS = new ArrayList<TagDTO>();
         TagDTO program = new TagDTO();
         program.setCategoryName("开发语言");
-        program.setTags(Arrays.asList("Java","Python","Perl","C","C++","C#",".NET","PHP","Swift","SQL","GO","MATLAB","Ruby","HTML","CSS","JavaScript","GoLang","汇编语言"));
+        program.setTags(Arrays.asList("Java","Python","Perl","C","C++","C#",".NET","PHP","Swift","SQL","GO","MATLAB","Ruby","HTML","CSS","JavaScript","jQuery","GoLang","汇编语言"));
         tagDTOS.add(program);
 
         TagDTO framework = new TagDTO();
         framework.setCategoryName("平台框架");
-        framework.setTags(Arrays.asList("Spring","SpringMVC","MyBatis","SpringBoot","SpringCloud","Hibernate"));
+        framework.setTags(Arrays.asList("Spring","SpringMVC","MyBatis","SpringBoot","SpringCloud","Hibernate","Struts"));
         tagDTOS.add(framework);
 
         TagDTO server = new TagDTO();
         server.setCategoryName("服务器");
-        server.setTags(Arrays.asList("Tomcat","NGINX"));
+        server.setTags(Arrays.asList("Tomcat","NGINX","Resin","WebSphere","WebLogic"));
         tagDTOS.add(server);
 
         TagDTO database = new TagDTO();
@@ -48,7 +48,7 @@ public class TagCache {
 
         TagDTO others = new TagDTO();
         others.setCategoryName("其他");
-        others.setTags(Arrays.asList("聊天","灌水"));
+        others.setTags(Arrays.asList("提问","聊天","灌水"));
         tagDTOS.add(others);
 
         return tagDTOS;
