@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.Cookie;
@@ -31,16 +33,32 @@ public class IndexController {
      * @param model
      * @return
      */
-    @GetMapping("/")
-    public String index(HttpServletRequest request,
+    @RequestMapping(value = {"/","/{action}"})
+    public String index(@PathVariable(name = "action",required = false) String action,
                         Model model,
                         @RequestParam(name = "page", defaultValue = "1") Integer page,
+                        @RequestParam(name = "size", defaultValue = "10") Integer size){
+        List<QuestionDTO> questions = questionService.findHotQuestions();
+        model.addAttribute("questions",questions);
+        PaginationDTO pagination = null;
+        if (action == null || "".equals(action) || (!"byZero".equals(action))){
+            pagination = questionService.findAll(page,size);
+        } else {
+            pagination = questionService.findByZero(page,size);
+        }
+        model.addAttribute("pagination",pagination);
+        return "index";
+    }
+
+    /*@RequestMapping("/byZero")
+    public String zero(Model model,
+                        @RequestParam(name = "page", defaultValue = "1") Integer page,
                         @RequestParam(name = "size", defaultValue = "20") Integer size){
-        PaginationDTO pagination = questionService.findAll(page,size);
+        PaginationDTO pagination = questionService.findByZero(page,size);
         List<QuestionDTO> questions = questionService.findHotQuestions();
         model.addAttribute("pagination",pagination);
         model.addAttribute("questions",questions);
         return "index";
-    }
+    }*/
 
 }

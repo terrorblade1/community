@@ -29,6 +29,8 @@ public interface QuestionService {
 
     PaginationDTO findByTag(String tag, Integer page, Integer size);
 
+    PaginationDTO findByZero(Integer page, Integer size);
+
     void saveDataToElasticSearch();
 
     PaginationDTO findByElasticSearch(String keyword, Integer page, Integer size) throws IOException;

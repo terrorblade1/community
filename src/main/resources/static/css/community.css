@@ -12,6 +12,10 @@ body {
     background-color: #ECECEC;
 }
 
+/*.page-name {
+    margin-left: 100px;
+}*/
+
 .web-name {
     font-size: 22px;
 }
@@ -231,4 +235,8 @@ body {
 
 .tags a:hover {
     text-decoration: none;
+}
+
+.container-fluid>.navbar-collapse, .container-fluid>.navbar-header, .container>.navbar-collapse, .container>.navbar-header {
+    margin-left: 135px;
 }

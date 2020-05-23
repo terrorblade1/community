@@ -26,7 +26,7 @@ public class SearchController {
     @RequestMapping("/search")
     public String search(String keyword,
                          @RequestParam(name = "page", defaultValue = "1") Integer page,
-                         @RequestParam(name = "size", defaultValue = "20") Integer size,
+                         @RequestParam(name = "size", defaultValue = "10") Integer size,
                          Model model){
         if ("".equals(keyword) || keyword == null){
             return "redirect:/";
@@ -34,13 +34,15 @@ public class SearchController {
         PaginationDTO pagination = null;
         try {
             pagination = questionService.findByElasticSearch(keyword, page, size);
+            System.out.println("page = "+page);
         } catch (IOException e) {
             e.printStackTrace();
         }
         List<QuestionDTO> questions = questionService.findHotQuestions();
         model.addAttribute("pagination",pagination);
         model.addAttribute("questions",questions);
-        return "index";
+        model.addAttribute("keyword",keyword);
+        return "search";
     }
 
 }

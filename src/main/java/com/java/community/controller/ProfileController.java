@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 /**
  * Author: yk
@@ -30,7 +29,7 @@ public class ProfileController {
     @GetMapping("/profile/{action}")
     public String profile(@PathVariable(name = "action") String action,
                           @RequestParam(name = "page", defaultValue = "1") Integer page,
-                          @RequestParam(name = "size", defaultValue = "20") Integer size,
+                          @RequestParam(name = "size", defaultValue = "10") Integer size,
                           HttpServletRequest request,
                           Model model){
         User user = (User) request.getSession().getAttribute("user");

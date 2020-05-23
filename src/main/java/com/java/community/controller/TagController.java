@@ -26,12 +26,13 @@ public class TagController {
     @GetMapping("/tag/{tag}")
     public String getBytag(@PathVariable(name = "tag") String tag,
                            @RequestParam(name = "page", defaultValue = "1") Integer page,
-                           @RequestParam(name = "size", defaultValue = "20") Integer size,
+                           @RequestParam(name = "size", defaultValue = "10") Integer size,
                            Model model){
         PaginationDTO pagination = questionService.findByTag(tag, page, size);
         List<QuestionDTO> questions = questionService.findHotQuestions();
         model.addAttribute("pagination",pagination);
         model.addAttribute("questions",questions);
+        model.addAttribute("keyword",tag);
         return "index";
     }
 

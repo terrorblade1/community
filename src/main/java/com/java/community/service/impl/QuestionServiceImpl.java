@@ -262,20 +262,11 @@ public class QuestionServiceImpl implements QuestionService {
      */
     @Override
     public PaginationDTO findByTag(String tag, Integer page, Integer size){
-        PaginationDTO paginationDTO = new PaginationDTO();
-        List<Question> questions = questionExtMapper.selectByTag(tag);
-        List<QuestionDTO> questionDTOS = new ArrayList<>();
-        for (Question question : questions) {
-            User user = userMapper.selectByPrimaryKey(question.getCreator());
-            QuestionDTO questionDTO = new QuestionDTO();
-            BeanUtils.copyProperties(question,questionDTO);
-            questionDTO.setUser(user);
-            questionDTOS.add(questionDTO);
-        }
-        paginationDTO.setData(questionDTOS);
-
         Integer totalPage;  //总页数
-        Integer totalCount = questionDTOS.size();  //总条数
+        QuestionExample example = new QuestionExample();
+        example.createCriteria()
+                .andTagLike(tag);
+        Integer totalCount = (int) questionMapper.countByExample(example);  //总条数
         if (totalCount % size == 0){
             //总页数 = 总条数 / 每页条数
             totalPage = totalCount / size;
@@ -289,7 +280,61 @@ public class QuestionServiceImpl implements QuestionService {
         if (page > totalPage){
             page = totalPage;  //页码大总页码则设置成总页码
         }
+
+        PaginationDTO paginationDTO = new PaginationDTO();
         paginationDTO.setPagination(totalPage,page);  //设置传到页面的分页数据
+        List<Question> questions = questionExtMapper.selectByTag(tag);
+        List<QuestionDTO> questionDTOS = new ArrayList<>();
+        for (Question question : questions) {
+            User user = userMapper.selectByPrimaryKey(question.getCreator());
+            QuestionDTO questionDTO = new QuestionDTO();
+            BeanUtils.copyProperties(question,questionDTO);
+            questionDTO.setUser(user);
+            questionDTOS.add(questionDTO);
+        }
+        paginationDTO.setData(questionDTOS);
+        return paginationDTO;
+    }
+
+    /**
+     * 0回复
+     * @param page
+     * @param size
+     * @return
+     */
+    @Override
+    public PaginationDTO findByZero(Integer page, Integer size){
+        Integer totalPage;  //总页数
+        QuestionExample example = new QuestionExample();
+        example.createCriteria()
+                .andCommentCountEqualTo(0);
+        Integer totalCount = (int) questionMapper.countByExample(example);  //总条数
+        if (totalCount % size == 0){
+            //总页数 = 总条数 / 每页条数
+            totalPage = totalCount / size;
+        } else {
+            //总页数 = 总条数 / 每页条数 + 1
+            totalPage = totalCount / size +1;
+        }
+        if (page < 1){
+            page = 1;  //页码小于1则设置成1
+        }
+        if (page > totalPage){
+            page = totalPage;  //页码大总页码则设置成总页码
+        }
+
+        PaginationDTO paginationDTO = new PaginationDTO();
+        paginationDTO.setPagination(totalPage,page);  //设置传到页面的分页数据
+        List<Question> questions = questionMapper.selectByExample(example);
+        List<QuestionDTO> questionDTOS = new ArrayList<>();
+        for (Question question : questions) {
+            User user = userMapper.selectByPrimaryKey(question.getCreator());
+            QuestionDTO questionDTO = new QuestionDTO();
+            BeanUtils.copyProperties(question,questionDTO);
+            questionDTO.setUser(user);
+            questionDTOS.add(questionDTO);
+        }
+        paginationDTO.setData(questionDTOS);
         return paginationDTO;
     }
 
@@ -428,5 +473,7 @@ public class QuestionServiceImpl implements QuestionService {
         paginationDTO.setData(questionDTOList);
         return paginationDTO;
     }
+
+
 
 }
